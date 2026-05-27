@@ -9,6 +9,3 @@ Tous les fichiers nécessaires sont déjà réalisés ; il ne reste que la liais
 Et pour finir, voici une vidéo démonstrative. Merci de visiter ce lien : https://drive.google.com/drive/folders/1qmONc1GOhfOflubLUt46p37XIhclpQK6
 
 Application web solidaire pour les aides sociales – Entraide locale - 
-
-et finallement voila un video dimenstratif pour notre application merci de cliquez sur ce lien : https://drive.google.com/drive/folders/13jAiqqf5819oX4ia-Jndp1Ob9SKmuVnw
-
