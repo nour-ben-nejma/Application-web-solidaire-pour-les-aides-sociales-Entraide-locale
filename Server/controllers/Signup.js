@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import { User } from '../models/User'; // Assurez-vous que vous avez défini un modèle User avec Mongoose
+import User from '../models/User.js'; // Corrected import with default exportion
 
 const router = express.Router();
 

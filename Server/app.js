@@ -1,25 +1,34 @@
 import express from 'express';
-const app = express();
-const PORT = 3000;
+import cors from 'cors';
 import signin from './controllers/Login.js';
 import Signup from './controllers/Signup.js';
-// Middleware pour parser le JSON
+import { connection } from './db.js';
+
+const app = express();
+// Use environment variable PORT or fallback to 3001
+const PORT = process.env.PORT || 3001;
+
+// Initialize MongoDB connection
+connection();
+
+// Middleware
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'http://localhost:5174', // client dev server port
   credentials: true,
 }));
-app.use('/api/login',signin);
-app.use('/api/signup',Signup);
-// Route de base
+
+// Mount routers
+app.use('/api/login', signin);
+app.use('/api', Signup); // routes defined in Signup.js (e.g., /signup)
+
+// Basic health check
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Démarrer le serveur
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
 
 export default app;
