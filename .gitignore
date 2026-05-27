@@ -27,3 +27,4 @@ yarn.lock
 .vite/
 # Local server configs
 /.gemini/
+.env
