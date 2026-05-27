@@ -1,24 +1,29 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
+
+const router = useRouter()
 const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const showPassword = ref(false)
+const errorMsg = ref('')
+const focused = ref('')
 
 const handleSubmit = async () => {
   isLoading.value = true
+  errorMsg.value = ''
   try {
-    // Effectuer l'appel API pour la connexion
-    const response = await axios.post('/api/signup', {
+    const response = await axios.post('/api/login', {
       email: email.value,
       password: password.value,
     })
-   console.log(response.data) // Affiche les données reçues de l'API
-    
+    console.log(response.data)
+    router.push('/donorDashboard')
   } catch (error) {
+    errorMsg.value = 'Email ou mot de passe incorrect. Réessayez.'
     console.error('Erreur lors de la connexion:', error)
-    // Gérer l'erreur, afficher un message, etc.
   } finally {
     isLoading.value = false
   }
@@ -26,385 +31,453 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="signin-container">
-    <div class="signin-background">
-      <div class="animated-circles">
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
+  <div class="page">
+    <!-- Left decorative panel -->
+    <div class="left-panel">
+      <div class="panel-blobs">
+        <div class="panel-blob blob-a"></div>
+        <div class="panel-blob blob-b"></div>
+      </div>
+      <div class="panel-content">
+        <div class="panel-logo">
+          <span class="logo-emoji">🤝</span>
+        </div>
+        <h1>Solidarité<br><span class="gold">Connect</span></h1>
+        <p class="panel-tagline">Rejoignez des milliers de personnes qui changent le monde, un geste à la fois.</p>
+
+        <div class="panel-stats">
+          <div class="p-stat">
+            <span class="p-num">2,458+</span>
+            <span class="p-label">Membres actifs</span>
+          </div>
+          <div class="p-stat">
+            <span class="p-num">1,927</span>
+            <span class="p-label">Vies touchées</span>
+          </div>
+        </div>
+
+        <div class="panel-quote">
+          <span class="q-mark">"</span>
+          <p>Donner, c'est recevoir infiniment plus en retour.</p>
+          <span class="q-author">— La communauté</span>
+        </div>
+
+        <div class="panel-hearts">
+          <span v-for="i in 5" :key="i" class="heart" :style="{ '--d': `${i * 0.8}s` }">❤️</span>
+        </div>
       </div>
     </div>
-    
-    <div class="signin-content">
-      <div class="signin-header">
-        <div class="logo-container animate-float">
-          <div class="logo-circle">
-            <span class="logo-icon">🤝</span>
+
+    <!-- Right form panel -->
+    <div class="right-panel">
+      <div class="form-wrapper">
+        <!-- Back to home -->
+        <button class="back-btn" @click="router.push('/')">← Accueil</button>
+
+        <div class="form-header">
+          <h2>Bon retour ! 👋</h2>
+          <p>Connectez-vous pour continuer votre mission</p>
+        </div>
+
+        <!-- Error message -->
+        <div v-if="errorMsg" class="error-alert">
+          <span>⚠️</span> {{ errorMsg }}
+        </div>
+
+        <form @submit.prevent="handleSubmit" class="signin-form">
+          <!-- Email -->
+          <div class="field-group" :class="{ active: focused === 'email' }">
+            <label for="email">Adresse email</label>
+            <div class="field-input-wrap">
+              <span class="field-icon">✉️</span>
+              <input
+                id="email"
+                v-model="email"
+                type="email"
+                placeholder="votre@email.com"
+                required
+                @focus="focused = 'email'"
+                @blur="focused = ''"
+              >
+            </div>
           </div>
-          <h1>Solidarité<span class="accent">Connect</span></h1>
-        </div>
-        <p class="welcome-text">Bienvenue dans votre espace personnel</p>
-      </div>
 
-      <form @submit.prevent="handleSubmit" class="signin-form">
-        <div class="form-group">
-          <label for="email" class="form-label">Email</label>
-          <div class="input-container">
-            <input 
-              id="email"
-              v-model="email"
-              type="email"
-              class="form-input"
-              placeholder="votre@email.com"
-              required
-            >
-            <span class="input-icon">✉️</span>
+          <!-- Password -->
+          <div class="field-group" :class="{ active: focused === 'password' }">
+            <label for="password">Mot de passe</label>
+            <div class="field-input-wrap">
+              <span class="field-icon">🔒</span>
+              <input
+                id="password"
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="••••••••"
+                required
+                @focus="focused = 'password'"
+                @blur="focused = ''"
+              >
+              <button type="button" class="eye-btn" @click="showPassword = !showPassword">
+                {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="password" class="form-label">Mot de passe</label>
-          <div class="input-container">
-            <input 
-              id="password"
-              v-model="password"
-              :type="showPassword ? 'text' : 'password'"
-              class="form-input"
-              placeholder="Votre mot de passe"
-              required
-            >
-            <button 
-              type="button"
-              class="password-toggle"
-              @click="showPassword = !showPassword"
-            >
-              {{ showPassword ? '👁️' : '👁️‍🗨️' }}
-            </button>
+          <!-- Options -->
+          <div class="form-options">
+            <label class="checkbox-label">
+              <input type="checkbox" class="custom-check">
+              <span class="check-mark"></span>
+              <span>Se souvenir de moi</span>
+            </label>
+            <a href="#" class="forgot-link">Mot de passe oublié ?</a>
           </div>
+
+          <!-- Submit -->
+          <button type="submit" class="submit-btn" :class="{ loading: isLoading }" :disabled="isLoading">
+            <span v-if="!isLoading" class="btn-content">
+              <span>Se connecter</span>
+              <span class="btn-arrow">→</span>
+            </span>
+            <span v-else class="loader"></span>
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span></span>
+          <p>ou continuez avec</p>
+          <span></span>
         </div>
 
-        <div class="form-options">
-          <label class="remember-me">
-            <input type="checkbox">
-            <span>Se souvenir de moi</span>
-          </label>
-          <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+        <!-- Social buttons -->
+        <div class="social-btns">
+          <button class="social-btn">🌐 Google</button>
+          <button class="social-btn">🍎 Apple</button>
         </div>
 
-        <button 
-          type="submit" 
-          class="submit-button"
-          :class="{ loading: isLoading }"
-           @click="handleSubmit"
-
-        >
-          <span class="button-text">{{ isLoading ? 'Connexion...' : 'Se connecter' }}</span>
-          <span class="button-loader"></span>
-        </button>
-      </form>
-
-      <div class="signin-footer">
-        <p>Pas encore membre ?</p>
-        <a href="#" class="register-link">Créer un compte</a>
+        <!-- Register link -->
+        <div class="form-footer">
+          <p>Pas encore membre ? <a @click="router.push('/signup')" class="register-link">Créer un compte →</a></p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.signin-container {
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.page {
+  font-family: 'Outfit', sans-serif;
   min-height: 100vh;
-  display: flex;
+  display: grid;
+  grid-template-columns: 45% 55%;
+  background: #080812;
+}
+
+/* ---- LEFT PANEL ---- */
+.left-panel {
   position: relative;
+  background: linear-gradient(145deg, #1a0533, #2d1b69, #0f172a);
   overflow: hidden;
-}
-
-.signin-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  z-index: 0;
-}
-
-.animated-circles {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.circle {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  animation: float 20s infinite;
-}
-
-.circle:nth-child(1) {
-  width: 300px;
-  height: 300px;
-  top: -150px;
-  right: -150px;
-  animation-delay: 0s;
-}
-
-.circle:nth-child(2) {
-  width: 500px;
-  height: 500px;
-  bottom: -250px;
-  left: -250px;
-  animation-delay: -5s;
-}
-
-.circle:nth-child(3) {
-  width: 200px;
-  height: 200px;
-  top: 50%;
-  right: 10%;
-  animation-delay: -10s;
-}
-
-.signin-content {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 440px;
-  margin: auto;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-.signin-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.logo-container {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.logo-circle {
-  width: 60px;
-  height: 60px;
-  background: rgba(76, 175, 80, 0.1);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  padding: 3rem;
+}
+.panel-blobs { position: absolute; inset: 0; pointer-events: none; }
+.panel-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+}
+.blob-a {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #7c3aed, transparent);
+  top: -100px; left: -100px;
+  opacity: 0.4;
+  animation: blobPulse 8s ease-in-out infinite;
+}
+.blob-b {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, #ec4899, transparent);
+  bottom: -80px; right: -80px;
+  opacity: 0.3;
+  animation: blobPulse 10s ease-in-out infinite reverse;
+}
+@keyframes blobPulse {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.2); opacity: 0.5; }
 }
 
-.logo-icon {
-  font-size: 2rem;
+.panel-content { position: relative; z-index: 1; text-align: center; color: white; }
+.logo-emoji { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+
+.panel-content h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+  color: #f1f5f9;
+}
+.gold { color: #fbbf24; }
+
+.panel-tagline {
+  color: rgba(255,255,255,0.65);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0 auto 2rem;
 }
 
-h1 {
-  font-size: 2rem;
-  color: var(--dark);
-  margin: 0;
-}
-
-.accent {
-  color: var(--primary);
-}
-
-.welcome-text {
-  color: var(--gray);
-  font-size: 1.1rem;
-  margin-top: 0.5rem;
-}
-
-.signin-form {
+.panel-stats {
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+.p-stat { text-align: center; }
+.p-num { display: block; font-size: 1.5rem; font-weight: 700; color: #a78bfa; }
+.p-label { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+
+.panel-quote {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+.q-mark {
+  font-size: 2.5rem;
+  color: rgba(167,139,250,0.3);
+  line-height: 1;
+  font-family: serif;
+  position: absolute;
+  top: 0.5rem; left: 0.75rem;
+}
+.panel-quote p { color: rgba(255,255,255,0.8); font-size: 0.92rem; font-style: italic; line-height: 1.6; }
+.q-author { font-size: 0.78rem; color: #a78bfa; display: block; margin-top: 0.5rem; }
+
+.panel-hearts { display: flex; justify-content: center; gap: 0.5rem; }
+.heart {
+  font-size: 0.9rem;
+  animation: heartBeat 2s ease-in-out infinite;
+  animation-delay: var(--d);
+}
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
 }
 
-.form-group {
+/* ---- RIGHT PANEL ---- */
+.right-panel {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  background: #0a0a18;
+}
+.form-wrapper {
+  width: 100%;
+  max-width: 420px;
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #64748b;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  margin-bottom: 2.5rem;
+  transition: all 0.3s;
+}
+.back-btn:hover { color: #a78bfa; border-color: rgba(167,139,250,0.4); }
+
+.form-header { margin-bottom: 2rem; }
+.form-header h2 { font-size: 2rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.4rem; }
+.form-header p { color: #64748b; font-size: 0.95rem; }
+
+.error-alert {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #f87171;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
 }
 
-.form-label {
-  font-size: 0.9rem;
-  color: var(--gray);
-  font-weight: 500;
-}
+.signin-form { display: flex; flex-direction: column; gap: 1.25rem; }
 
-.input-container {
+.field-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.field-group label { font-size: 0.88rem; color: #94a3b8; font-weight: 500; }
+
+.field-input-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  transition: all 0.3s;
 }
-
-.form-input {
-  width: 90%;
-  padding: 1rem;
-  padding-right: 3rem;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+.field-group.active .field-input-wrap {
+  border-color: #7c3aed;
+  background: rgba(124,58,237,0.07);
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+}
+.field-icon {
+  padding: 0 0.75rem 0 1rem;
   font-size: 1rem;
-  transition: all 0.3s ease;
-  background: white;
+  opacity: 0.6;
 }
-
-.form-input:focus {
-  border-color: var(--primary);
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
-}
-
-.input-icon {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.2rem;
-  opacity: 0.5;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
+.field-input-wrap input {
+  flex: 1;
+  background: transparent;
   border: none;
+  outline: none;
+  color: #e2e8f0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.97rem;
+  padding: 1rem 1rem 1rem 0;
+}
+.field-input-wrap input::placeholder { color: #475569; }
+.eye-btn {
+  background: none; border: none;
+  padding: 0 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  padding: 0;
-  font-size: 1.2rem;
   opacity: 0.5;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s;
 }
-
-.password-toggle:hover {
-  opacity: 1;
-}
+.eye-btn:hover { opacity: 1; }
 
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
 }
-
-.remember-me {
+.checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+  font-size: 0.88rem;
+  color: #64748b;
 }
-
-.forgot-password {
-  color: var(--primary);
+.checkbox-label input { display: none; }
+.check-mark {
+  width: 18px; height: 18px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 5px;
+  background: rgba(255,255,255,0.04);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.checkbox-label input:checked + .check-mark {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+.checkbox-label input:checked + .check-mark::after {
+  content: '✓';
+  font-size: 0.7rem;
+  color: white;
+}
+.forgot-link {
+  font-size: 0.88rem;
+  color: #a78bfa;
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color 0.3s;
 }
+.forgot-link:hover { color: #c4b5fd; }
 
-.forgot-password:hover {
-  color: var(--primary-light);
-}
-
-.submit-button {
-  position: relative;
+.submit-btn {
   width: 100%;
-  padding: 1rem;
-  background: rgba(235, 234, 213, 0.856) ;
-  color: rgba(109, 108, 49, 0.856);
+  padding: 1.05rem;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
+  color: white;
+  font-family: 'Outfit', sans-serif;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.4);
 }
-
-.submit-button:hover {
-  background: var(--primary-light);
+.submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(124,58,237,0.55);
 }
+.submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-.submit-button.loading .button-text {
-  opacity: 0;
-}
+.btn-content { display: flex; align-items: center; gap: 0.5rem; }
+.btn-arrow { transition: transform 0.3s; }
+.submit-btn:hover .btn-arrow { transform: translateX(4px); }
 
-.submit-button.loading .button-loader {
-  opacity: 1;
-}
-
-.button-loader {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
+.loader {
+  width: 22px; height: 22px;
+  border: 2.5px solid rgba(255,255,255,0.25);
   border-top-color: white;
-  animation: spin 1s infinite linear;
-  opacity: 0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.75rem 0;
 }
+.divider span { flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+.divider p { color: #475569; font-size: 0.83rem; white-space: nowrap; }
 
-.signin-footer {
-  margin-top: 2rem;
+.social-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.social-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  color: #94a3b8;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.social-btn:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; border-color: rgba(255,255,255,0.15); }
+
+.form-footer {
   text-align: center;
+  margin-top: 1.75rem;
+  color: #64748b;
   font-size: 0.9rem;
 }
-
 .register-link {
-  color: var(--primary);
+  color: #a78bfa;
+  cursor: pointer;
+  font-weight: 600;
   text-decoration: none;
-  font-weight: 500;
-  margin-left: 0.5rem;
-  transition: color 0.3s ease;
+  transition: color 0.3s;
 }
+.register-link:hover { color: #c4b5fd; }
 
-.register-link:hover {
-  color: var(--primary-light);
-}
-
-@media (max-width: 480px) {
-  .signin-content {
-    padding: 1.5rem;
-    margin: 1rem;
-    border-radius: 16px;
-  }
-
-  h1 {
-    font-size: 1.75rem;
-  }
-
-  .welcome-text {
-    font-size: 1rem;
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(5%, 5%);
-  }
-  50% {
-    transform: translate(10%, -5%);
-  }
-  75% {
-    transform: translate(-5%, 5%);
-  }
+@media (max-width: 768px) {
+  .page { grid-template-columns: 1fr; }
+  .left-panel { display: none; }
 }
 </style>
